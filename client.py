@@ -1,15 +1,21 @@
-import pika, sys, os
+import pika, sys, os, base64
 
 def main():
+    message = ""
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
-    channel.queue_declare(queue='hello')
+    channel.queue_declare(queue='leilao_iniciado')
 
     def callback(ch, method, properties, body):
         print(f" [x] Received {body}")
+        message = body
+        message = base64.b64decode(message)
+        message = message.decode('utf-8')
 
-    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+        print(f" [x] Decoded {message}")
+
+    channel.basic_consume(queue='leilao_iniciado', on_message_callback=callback, auto_ack=True)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
@@ -17,6 +23,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+
+
     except KeyboardInterrupt:
         print('Interrupted')
         try:
