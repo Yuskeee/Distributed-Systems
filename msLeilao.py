@@ -12,7 +12,7 @@ def json_serial(obj):
 
 def to_json(data):
         #Tratamento do objeto leilão para envio via RabbitMQ
-    json_string = json.dumps(leilao_01, default=json_serial)
+    json_string = json.dumps(data, default=json_serial)
     json_bytes = json_string.encode('utf-8')
     base64_bytes = base64.b64encode(json_bytes)
     return base64_bytes

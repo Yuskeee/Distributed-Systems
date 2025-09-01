@@ -1,4 +1,4 @@
-import pika, sys, os, base64
+import pika, sys, os, base64, json
 
 def main():
     message = ""
@@ -13,8 +13,9 @@ def main():
         message = body
         message = base64.b64decode(message)
         message = message.decode('utf-8')
+        data = json.loads(message)
 
-        print(f" [x] Decoded {message}")
+        print(f" [x] Decoded {data}")
 
     channel.basic_consume(queue='leilao_iniciado', on_message_callback=callback, auto_ack=True)
     channel.basic_consume(queue='leilao_finalizado', on_message_callback=callback, auto_ack=True)
