@@ -7,7 +7,7 @@ def generate_keys_in_folder(num_keys, folder_name="keys"):
 
     Args:
         num_keys (int): The number of key pairs to generate.
-        folder_name (str): The name of the folder to store the keys in.  Defaults to "keys".
+        folder_name (str): The name of the folder to store the keys in. Defaults to "keys".
     """
 
     if not os.path.exists(folder_name):

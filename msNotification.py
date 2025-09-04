@@ -1,13 +1,13 @@
 import pika, datetime, sys, os, base64, json
 
 def json_serial(obj):
-    """Serializador JSON para objetos não serializáveis por padrão."""
+    """JSON serializer for objects not serializable by default."""
     if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat() # Converte data/hora para string no formato ISO 8601
-    raise TypeError(f"O tipo {type(obj)} não é serializável em JSON")
+        return obj.isoformat() # Converts date/time to ISO 8601 string format
+    raise TypeError(f"Type {type(obj)} not serializable in JSON")
 
 def to_json(data):
-        #Tratamento do objeto leilão para envio via RabbitMQ
+    # Handling of the auction object for sending via RabbitMQ
     json_string = json.dumps(data, default=json_serial)
     json_bytes = json_string.encode('utf-8')
     base64_bytes = base64.b64encode(json_bytes)
@@ -31,9 +31,9 @@ def main():
 
         print(f" [x] Decoded {message}")
 
-        queue_name = "leilao_" + str(data["id_leilao"])
+        queue_name = "leilao_" + str(data["auction_id"])
         channel.queue_declare(queue=queue_name, durable=True)
-        channel.basic_publish(exchange='', routing_key=queue_name, body=to_json(data)) #aqui mandamos para as filas do leilao mas n sei se mandamos so o lance vencedor ou qualquer lance, se tem diferença entre eles
+        channel.basic_publish(exchange='', routing_key=queue_name, body=to_json(data))
 
     channel.basic_consume(queue='leilao_iniciado', on_message_callback=callback, auto_ack=True)
     channel.basic_consume(queue='leilao_finalizado', on_message_callback=callback, auto_ack=True)
