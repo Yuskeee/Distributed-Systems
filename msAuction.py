@@ -34,7 +34,7 @@ auction_01 = {
     "auction_id": 101,
     "description": "Latest generation gaming notebook",
     "start_date": datetime.datetime(2025, 9, 2, 14), # Year, Month, Day, Hour
-    "end_date": datetime.datetime(2025, 9, 3, 16),
+    "end_date": datetime.datetime(2025, 9, 10, 16),
     "status": "active"
 }
 
@@ -45,8 +45,12 @@ def main():
         pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
-    channel.queue_declare(queue='leilao_iniciado')
-    channel.queue_declare(queue='leilao_finalizado')
+    # TODO: Continuar a logica de exchanges
+    channel.exchange_declare(exchange='leilao_iniciado',
+                         exchange_type='direct')
+    channel.exchange_declare(exchange='leilao_finalizado',
+                         exchange_type='direct')
+    
 
     if (datetime.datetime.now()) >= auction_01["start_date"] and (datetime.datetime.now()) <= auction_01["end_date"]:
         channel.basic_publish(exchange='', routing_key='leilao_iniciado', body=to_json(auction_01))
