@@ -50,9 +50,22 @@ def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
-    channel.queue_declare(queue='leilao_iniciado')
-    channel.queue_declare(queue='leilao_finalizado')
     channel.queue_declare(queue='lance_realizado')
+
+    auction_open_queue = channel.queue_declare(queue='', exclusive=True)
+    queue_name_open = auction_open_queue.method.queue
+
+    channel.queue_bind(exchange='leilao_iniciado',
+                    queue=queue_name_open,
+                    routing_key='leilao_iniciado')
+    
+    auction_closed_queue = channel.queue_declare(queue='', exclusive=True)
+    queue_name_closed = auction_closed_queue.method.queue
+
+    channel.queue_bind(exchange='leilao_finalizado',
+                    queue=queue_name_closed,
+                    routing_key='leilao_finalizado')
+
 
     def callback(ch, method, properties, body):
         print(f" [x] Received {body}")
@@ -70,8 +83,8 @@ def main():
         else:
             print(f" [.] Auction status is '{data.get('status')}'. No action taken.")
 
-    channel.basic_consume(queue='leilao_iniciado', on_message_callback=callback, auto_ack=True)
-    channel.basic_consume(queue='leilao_finalizado', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue=queue_name_open, on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue=queue_name_closed, on_message_callback=callback, auto_ack=True)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()

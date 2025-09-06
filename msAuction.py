@@ -39,13 +39,11 @@ auction_01 = {
 }
 
 def main():
-    # Code snippet to create the queues under the Auction's responsibility
     s = sched.scheduler(time.time, time.sleep)
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
-    # TODO: Continuar a logica de exchanges
     channel.exchange_declare(exchange='leilao_iniciado',
                          exchange_type='direct')
     channel.exchange_declare(exchange='leilao_finalizado',
@@ -53,14 +51,15 @@ def main():
     
 
     if (datetime.datetime.now()) >= auction_01["start_date"] and (datetime.datetime.now()) <= auction_01["end_date"]:
-        channel.basic_publish(exchange='', routing_key='leilao_iniciado', body=to_json(auction_01))
+        channel.basic_publish(exchange='leilao_iniciado',
+                      routing_key='leilao_iniciado',
+                      body=to_json(auction_01))
         print(" [x] Sent ")
         connection.close()
 
         
         # Scheduling the end of the auction
         end_auction = (auction_01["end_date"]).timestamp()
-        print(f"Auction will end in {end_auction} seconds.")
         s.enterabs(end_auction, 1, send_auction_end, argument=(
                       auction_01,
                     ))
@@ -68,7 +67,9 @@ def main():
     
     elif (datetime.datetime.now()) > auction_01["end_date"]:
         auction_01["status"] = "finished"
-        channel.basic_publish(exchange='', routing_key='leilao_finalizado', body=to_json(auction_01))
+        channel.basic_publish(exchange='leilao_finalizado',
+                      routing_key='leilao_finalizado',
+                      body=to_json(auction_01))
         print(" [x] Sent ")
         connection.close()
 
