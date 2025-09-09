@@ -13,7 +13,6 @@ class MSBid:
         self.rabbitmq = RabbitMQ()
         self.highest_bids = {}
         self.auction_status = {}
-        self.public_keys = self.load_public_keys()
 
     def load_public_keys(self):
         """Loads all public keys from 'keys' folder as user_id -> public_key."""
@@ -103,7 +102,7 @@ class MSBid:
             print(f"[MSBid] Bid received: user {user_id[:8]}..., auction {auction_id}, value {amount:.2f}")
 
             # 1. Public key must be known
-            pubkey = self.public_keys.get(user_id)
+            pubkey = self.load_public_keys().get(user_id)
             if not pubkey:
                 print("[MSBid] Public key for user not found. Ignoring bid.")
                 return
